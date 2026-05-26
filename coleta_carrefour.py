@@ -36,42 +36,6 @@ DB_PASS = "root"
 # --- URL BASE DO SITE ---
 BASE_URL = "https://mercado.carrefour.com.br"
 
-# --- TERMOS DE BUSCA EXPANDIDOS (50+ categorias) ---
-# TERMOS_DE_BUSCA = [
-#     # Mercearia / Alimentos Básicos
-#     "arroz", "feijão", "açúcar", "sal", "farinha de trigo",
-#     "macarrão", "óleo de soja", "azeite", "café", "leite integral",
-#     "leite em pó", "achocolatado", "biscoito", "bolacha",
-#     "cereal matinal", "aveia", "granola", "mel", "geleia",
-#     # Molhos e Condimentos
-#     "molho de tomate", "maionese", "ketchup", "mostarda",
-#     "vinagre", "tempero", "pimenta",
-#     # Bebidas
-#     "refrigerante coca cola", "suco de laranja", "cerveja",
-#     "água mineral", "chá", "energético", "suco de uva",
-#     "refrigerante guaraná",
-#     # Higiene Pessoal
-#     "sabonete", "shampoo", "condicionador", "desodorante",
-#     "pasta de dente", "escova de dente", "papel higiênico",
-#     "absorvente", "fralda descartável",
-#     # Limpeza
-#     "detergente", "sabão em pó", "água sanitária",
-#     "desinfetante", "amaciante", "esponja de aço",
-#     "limpador multiuso",
-#     # Frios e Laticínios
-#     "queijo mussarela", "presunto", "iogurte",
-#     "manteiga", "requeijão", "creme de leite",
-#     # Padaria e Confeitaria
-#     "pão de forma", "bolo pronto", "torrada",
-#     "pão francês",
-#     # Carnes e Proteínas
-#     "frango", "carne bovina", "linguiça",
-#     "hambúrguer", "ovo", "salsicha", "bacon",
-#     # Congelados
-#     "pizza congelada", "lasanha congelada", "sorvete",
-#     "nuggets",
-# ]
-
 TERMOS_DE_BUSCA = [
     # Mercearia / Alimentos Básicos
     "arroz", "feijão", "açúcar", "sal", "farinha de trigo",
@@ -264,6 +228,51 @@ def download_image(url, timeout=15):
     except Exception as e:
         logger.warning(f"Falha ao baixar imagem {url[:80]}...: {e}")
         return None, None, 0
+
+
+def fetch_hires_image_url(product_link, fallback_url=None, timeout=12):
+    """
+    Acessa a página de detalhes do produto usando apenas requests (sem Playwright),
+    extrai a URL de imagem em alta resolução do VTEX (/arquivos/ids/...)
+    e retorna a URL. Retorna `fallback_url` em caso de falha.
+
+    Usando requests em vez de Playwright aqui é fundamental: evita abrir
+    abas no browser (que acumulam memória no motor V8/Node.js causando OOM).
+    """
+    if not product_link:
+        return fallback_url
+    try:
+        resp = requests.get(
+            product_link,
+            timeout=timeout,
+            headers={
+                "User-Agent": random.choice(USER_AGENTS),
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+                "Referer": BASE_URL,
+            },
+            allow_redirects=True,
+        )
+        if resp.status_code != 200:
+            return fallback_url
+
+        soup = BeautifulSoup(resp.text, "lxml")
+
+        # Procura imagem VTEX de alta resolução na galeria do produto
+        for img in soup.select("img"):
+            src = img.get("src") or ""
+            if "/arquivos/ids/" in src:
+                if src.startswith("//"):
+                    src = "https:" + src
+                elif src.startswith("/"):
+                    src = BASE_URL + src
+                return src
+
+        return fallback_url
+
+    except Exception as e:
+        logger.debug(f"fetch_hires_image_url falhou para {product_link[:60]}: {e}")
+        return fallback_url
 
 
 def save_price_history(cursor, sku, preco):
@@ -619,8 +628,18 @@ def scrape_carrefour(termo, browser_context):
 
                 # Salva cada produto no banco
                 for produto in produtos:
-                    # Download da imagem
                     imagem_url = produto.get("imagem_url")
+                    link = produto.get("link")
+
+                    if link:
+                        # Usa requests (sem Playwright) para página de detalhe,
+                        # evitando acumulação de memória V8/Node.js (OOM)
+                        hires_url = fetch_hires_image_url(link, fallback_url=imagem_url)
+                        if hires_url and hires_url != imagem_url:
+                            logger.debug(f"  📸 Hi-Res encontrada para '{produto.get('nome', '')[:40]}'")
+                            imagem_url = hires_url
+
+                    # Download da imagem (hi-res ou fallback thumbnail)
                     img_bytes, img_ct, img_size = download_image(imagem_url)
                     produto["imagem_data"] = img_bytes
                     produto["imagem_content_type"] = img_ct
@@ -631,8 +650,8 @@ def scrape_carrefour(termo, browser_context):
                     save_product_to_db(cur, termo, produto)
                     total_produtos += 1
 
-                    # Micro-delay entre downloads de imagem
-                    time.sleep(random.uniform(0.1, 0.3))
+                    # Delay para não sobrecarregar
+                    time.sleep(random.uniform(0.1, 0.4))
 
                 conn.commit()
 
@@ -682,22 +701,26 @@ def main():
             args=[
                 "--disable-blink-features=AutomationControlled",
                 "--no-sandbox",
+                "--js-flags=--max-old-space-size=4096",
             ]
-        )
-
-        # Cria contexto com User-Agent aleatório
-        context = browser.new_context(
-            user_agent=random.choice(USER_AGENTS),
-            viewport={"width": 1920, "height": 1080},
-            locale="pt-BR",
         )
 
         for i, termo in enumerate(TERMOS_DE_BUSCA, 1):
             logger.info(f"\n[{i}/{len(TERMOS_DE_BUSCA)}] Processando termo: '{termo}'")
 
+            # Cria contexto com User-Agent aleatório para CADA termo para evitar vazamento de memória
+            context = browser.new_context(
+                user_agent=random.choice(USER_AGENTS),
+                viewport={"width": 1920, "height": 1080},
+                locale="pt-BR",
+            )
+
             produtos, imagens_bytes = scrape_carrefour(termo, context)
             total_geral_produtos += produtos
             total_geral_imagens_bytes += imagens_bytes
+            
+            # Fecha o contexto imediatamente para liberar memória do Node.js (V8 heap)
+            context.close()
 
             # Delay maior entre termos diferentes
             if i < len(TERMOS_DE_BUSCA):
