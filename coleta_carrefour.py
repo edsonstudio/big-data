@@ -37,39 +37,152 @@ DB_PASS = "root"
 BASE_URL = "https://mercado.carrefour.com.br"
 
 # --- TERMOS DE BUSCA EXPANDIDOS (50+ categorias) ---
+# TERMOS_DE_BUSCA = [
+#     # Mercearia / Alimentos Básicos
+#     "arroz", "feijão", "açúcar", "sal", "farinha de trigo",
+#     "macarrão", "óleo de soja", "azeite", "café", "leite integral",
+#     "leite em pó", "achocolatado", "biscoito", "bolacha",
+#     "cereal matinal", "aveia", "granola", "mel", "geleia",
+#     # Molhos e Condimentos
+#     "molho de tomate", "maionese", "ketchup", "mostarda",
+#     "vinagre", "tempero", "pimenta",
+#     # Bebidas
+#     "refrigerante coca cola", "suco de laranja", "cerveja",
+#     "água mineral", "chá", "energético", "suco de uva",
+#     "refrigerante guaraná",
+#     # Higiene Pessoal
+#     "sabonete", "shampoo", "condicionador", "desodorante",
+#     "pasta de dente", "escova de dente", "papel higiênico",
+#     "absorvente", "fralda descartável",
+#     # Limpeza
+#     "detergente", "sabão em pó", "água sanitária",
+#     "desinfetante", "amaciante", "esponja de aço",
+#     "limpador multiuso",
+#     # Frios e Laticínios
+#     "queijo mussarela", "presunto", "iogurte",
+#     "manteiga", "requeijão", "creme de leite",
+#     # Padaria e Confeitaria
+#     "pão de forma", "bolo pronto", "torrada",
+#     "pão francês",
+#     # Carnes e Proteínas
+#     "frango", "carne bovina", "linguiça",
+#     "hambúrguer", "ovo", "salsicha", "bacon",
+#     # Congelados
+#     "pizza congelada", "lasanha congelada", "sorvete",
+#     "nuggets",
+# ]
+
 TERMOS_DE_BUSCA = [
     # Mercearia / Alimentos Básicos
     "arroz", "feijão", "açúcar", "sal", "farinha de trigo",
     "macarrão", "óleo de soja", "azeite", "café", "leite integral",
     "leite em pó", "achocolatado", "biscoito", "bolacha",
     "cereal matinal", "aveia", "granola", "mel", "geleia",
+    "extrato de tomate", "milho de pipoca", "tapioca", "leite condensado",
+    "mistura para bolo", "azeitona", "ervilha em conserva", "milho em conserva",
+
     # Molhos e Condimentos
     "molho de tomate", "maionese", "ketchup", "mostarda",
-    "vinagre", "tempero", "pimenta",
-    # Bebidas
-    "refrigerante coca cola", "suco de laranja", "cerveja",
-    "água mineral", "chá", "energético", "suco de uva",
-    "refrigerante guaraná",
+    "vinagre", "tempero", "pimenta", "molho shoyu", "molho de pimenta",
+    "molho inglês", "caldo de carne", "caldo de galinha", "sal grosso",
+
+    # Bebidas Não Alcoólicas
+    "refrigerante coca cola", "suco de laranja", "água mineral",
+    "chá", "energético", "suco de uva", "refrigerante guaraná",
+    "água de coco", "suco em pó", "chá gelado", "água com gás",
+    "bebida láctea", "xarope para soda",
+
+    # Bebidas Alcoólicas
+    "cerveja", "vinho tinto", "vinho branco", "vodka", "whisky",
+    "gin", "espumante", "cachaça", "tequila", "licor", "rum",
+
+    # Hortifruti / Feira (Frutas, Verduras e Legumes)
+    "tomate", "cebola", "alho", "batata", "cenoura", "maçã",
+    "banana", "laranja", "alface", "limão", "uva", "mamão",
+    "melancia", "morango", "pimentão", "mandioca", "brócolis",
+    "abobrinha", "cheiro verde", "coentro",
+
     # Higiene Pessoal
     "sabonete", "shampoo", "condicionador", "desodorante",
     "pasta de dente", "escova de dente", "papel higiênico",
-    "absorvente", "fralda descartável",
+    "absorvente", "fralda descartável", "fio dental",
+    "enxaguante bucal", "hastes flexíveis", "algodão",
+    "creme de barbear", "lâmina de barbear", "sabonete líquido",
+
+    # Beleza e Cosméticos
+    "creme hidratante", "protetor solar", "tintura para cabelo",
+    "maquiagem", "esmalte", "removedor de esmalte",
+    "loção pós-barba", "creme para pentear",
+
     # Limpeza
     "detergente", "sabão em pó", "água sanitária",
     "desinfetante", "amaciante", "esponja de aço",
-    "limpador multiuso",
+    "limpador multiuso", "sabão líquido", "álcool em gel",
+    "álcool líquido", "lustra móveis", "inseticida",
+    "saco de lixo", "pano de chão", "vassoura", "rodo",
+    "limpa vidros", "tira manchas",
+
     # Frios e Laticínios
     "queijo mussarela", "presunto", "iogurte",
     "manteiga", "requeijão", "creme de leite",
+    "queijo prato", "mortadela", "salaminho", "peito de peru",
+    "margarina", "leite fermentado", "queijo ralado",
+
     # Padaria e Confeitaria
     "pão de forma", "bolo pronto", "torrada",
-    "pão francês",
+    "pão francês", "pão de queijo", "bisnaguinha",
+    "pão sírio", "pão integral", "massa de pastel",
+
     # Carnes e Proteínas
     "frango", "carne bovina", "linguiça",
     "hambúrguer", "ovo", "salsicha", "bacon",
+    "carne moída", "peito de frango", "costela",
+    "picanha", "coxa de frango", "carne suína", "lombo",
+
+    # Peixaria e Frutos do Mar
+    "peixe", "camarão", "bacalhau", "salmão",
+    "tilápia", "sardinha em lata", "atum em lata", "filé de merluza",
+
     # Congelados
     "pizza congelada", "lasanha congelada", "sorvete",
-    "nuggets",
+    "nuggets", "pão de queijo congelado", "batata frita congelada",
+    "hambúrguer congelado", "pratos prontos congelados", "polpa de fruta",
+    "ervilha congelada", "brócolis congelado",
+
+    # Saúde e Bem-Estar / Farmácia
+    "suplemento vitamínico", "whey protein", "preservativo",
+    "curativo", "antisséptico", "barrinha de cereal",
+    "chá funcional", "adoçante",
+
+    # Produtos Diet, Light e Especiais
+    "leite vegetal", "hambúrguer vegetal", "produto sem glúten",
+    "produto sem lactose", "iogurte zero", "chocolate diet",
+
+    # Pet Shop
+    "ração para cachorro", "ração para gato", "petisco para cachorro",
+    "areia para gato", "tapete higiênico", "sachê para gato",
+    "shampoo para pet", "coleira",
+
+    # Bebês e Crianças
+    "lenço umedecido", "pomada para assadura", "leite em pó infantil",
+    "papinha", "shampoo infantil", "chupeta", "mamadeira",
+
+    # Casa, Bazar e Eletroportáteis
+    "panela", "liquidificador", "airfryer", "fritadeira elétrica",
+    "micro-ondas", "travesseiro", "toalha de banho", "lençol",
+    "pote de plástico", "copo", "talheres", "lâmpada", "pilha",
+
+    # Eletrônicos e Informática
+    "smartphone", "notebook", "tv", "fone de ouvido",
+    "cabo usb", "carregador de celular", "mouse",
+
+    # Automotivo
+    "pneu", "óleo automotivo", "limpador de para-brisa",
+    "cera automotiva", "aromatizante para carro",
+
+    # Papelaria e Escritório
+    "caderno", "caneta", "papel sulfite", "lápis",
+    "borracha", "fita adesiva", "tesoura"
 ]
 
 # --- ROTAÇÃO DE USER-AGENTS ---
