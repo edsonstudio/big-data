@@ -14,7 +14,7 @@ import io
 app = Flask(__name__)
 
 # --- CONFIGURAÇÕES DO BANCO DE DADOS ---
-DB_HOST = "localhost"
+DB_HOST = "127.0.0.1"
 DB_NAME = "bigdata_iot"
 DB_USER = "postgres"
 DB_PASS = "root"

@@ -13,8 +13,15 @@ import plotly.express as px
 import plotly.graph_objects as go
 from io import BytesIO
 
+# --- INTERFACE DO DASHBOARD ---
+st.set_page_config(
+    page_title="Dashboard Big Data — Preços Dinâmicos",
+    page_icon="📊",
+    layout="wide"
+)
+
 # --- CONFIGURAÇÕES DO BANCO DE DADOS ---
-DB_HOST = "localhost"
+DB_HOST = "127.0.0.1"
 DB_NAME = "bigdata_iot"
 DB_USER = "postgres"
 DB_PASS = "root"
@@ -158,11 +165,6 @@ def load_product_image(sku):
 
 
 # --- INTERFACE DO DASHBOARD ---
-st.set_page_config(
-    page_title="Dashboard Big Data — Preços Dinâmicos",
-    page_icon="📊",
-    layout="wide"
-)
 
 st.title("📊 Dashboard de Big Data & Analytics: Preços de Varejo")
 st.markdown("Monitoramento em tempo real da coleta de preços, promoções e volume de dados do sistema IoT.")
